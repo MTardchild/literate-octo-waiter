@@ -1,5 +1,4 @@
 #define EventType unsigned int
-
 EventType eTracker = 0;
 void setEvent(EventType ev){eTracker |= ev;}
 #define eventIsPresent(ev) (ev & eTracker)
