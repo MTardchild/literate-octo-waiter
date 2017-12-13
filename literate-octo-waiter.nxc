@@ -1,3 +1,5 @@
+#define IRSENSOR_PORT S1
+
 task main() {
 
 }

@@ -1,0 +1,28 @@
+int readSensor() {
+	return getDist(SensorRaw(IRSENSOR_PORT));
+}
+
+void output(int val) {
+     float f_val = val;
+     f_val /= 100;
+     NumOut(0, LCD_LINE1, f_val);
+}
+
+int getDist(int val){
+    int sens[9] = {780,560,400,320,280,260,240,220,210};
+    int dist[9] = {5	,10,	20,	30,	40,	50,	60,	70,	80 };
+
+
+    int i = 0;
+    while(sens[i] > val && i < 8) i++;
+    
+    if(i == 0)
+         return dist[i] * 100;
+
+    int sens_diff = sens[i-1] - sens[i];
+    int dist_diff = dist[i] - dist[i-1];
+    
+    val -= sens[i];
+    
+    return dist[i]*100 - (dist_diff*100 / sens_diff * val);
+}
