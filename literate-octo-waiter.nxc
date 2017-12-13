@@ -5,5 +5,11 @@
 #include "movement.nxc"
 
 task main() {
-	
+	#ifdef parse
+		//parse
+	#else
+		// map
+	#endif // parse	
+	// pathfinding
+	// movement
 }
