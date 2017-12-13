@@ -1,1 +1,4 @@
 byte x, y;
+byte mU_parsedMap[196] = {0};
+
+#define mU_map(row, col) (mU_parsedMap[col+MAP_SIZE*row])

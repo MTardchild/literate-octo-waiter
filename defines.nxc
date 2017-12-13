@@ -1,1 +1,3 @@
 #define IRSENSOR_PORT S1
+#define ARENA default_arena
+#define MAP_SIZE 14

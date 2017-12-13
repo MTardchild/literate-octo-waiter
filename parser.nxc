@@ -1,4 +1,44 @@
+#ifndef PARSER 
+#define PARSER
+
 #include "arenas.nxc"
+#include "mapUtil.nxc"
 
 
 
+void parse(){
+	int i;
+	
+	for (i=0; i < 196; i++){
+		switch(ARENA[i]){
+		case ' ':
+			mU_parsedMap[i] = 0;
+			break;
+		case '#':
+		
+			
+		
+			break;
+		case '1':
+		
+			
+		
+			break;
+		case '2':
+		
+			
+		
+			break;
+		case '3':
+		
+			
+		
+		
+		
+		}
+		
+	}
+
+}
+
+#endif // PARSER
