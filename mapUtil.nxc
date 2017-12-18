@@ -1,4 +1,67 @@
-byte x, y;
-byte mU_parsedMap[196] = {0};
+//
+// Created by tscharntke on 15.12.2017.
+//
 
-#define mU_map(row, col) (mU_parsedMap[col+MAP_SIZE*row])
+#include "map_util.h"
+
+byte mu_parsed_map[ARENA_SIZE] = {0};
+
+
+byte adjust_row(byte row, direction_t dir){
+    if (dir == n)
+        return row - 1;
+    if (dir == s)
+        return row + 1;
+    return row;
+}
+
+
+byte adjust_col(byte col, direction_t dir){
+    if (dir == w)
+        return col - 1;
+    if (dir == e)
+        return col + 1;
+    return col;
+}
+
+
+bool is_border(byte row, byte col, direction_t dir){
+    row = adjust_row(row, dir);
+    col = adjust_col(col, dir);
+    if (row == 0 || row == 13 || col == 0 || col == 13)
+        return True;
+    return False;
+}
+
+
+bool visited(byte row, byte col, direction_t dir){
+    row = adjust_row(row, dir);
+    col = adjust_col(col, dir);
+    if (map_val(row, col) != 0)
+        return True;
+    return False;
+}
+
+
+bool is_table(byte row, byte col, direction_t dir){
+    row = adjust_row(row, dir);
+    col = adjust_col(col, dir);
+    byte val = map_val(row, col);
+    if (val == table_1 || val == table_2 || val == table_3)
+        return True;
+    return False;
+}
+
+byte next_to_goal(byte row, byte col, byte goal){
+    direction_t dir;
+    for (dir = n; dir <=w; dir++){
+        byte r = adjust_row(row, dir);
+        byte c = adjust_col(col, dir);
+        if (map_val (r, c) == goal)
+            return dir;
+    }
+    return no_dir;
+}
+
+
+
