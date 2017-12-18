@@ -1,44 +1,33 @@
-#ifndef PARSER 
-#define PARSER
+//
+// Created by tscharntke on 15.12.2017.
+//
 
-#include "arenas.nxc"
-#include "mapUtil.nxc"
+#include "parser.h"
 
 
-
-void parse(){
-	int i;
-	
-	for (i=0; i < 196; i++){
-		switch(ARENA[i]){
-		case ' ':
-			mU_parsedMap[i] = 0;
-			break;
-		case '#':
-		
-			
-		
-			break;
-		case '1':
-		
-			
-		
-			break;
-		case '2':
-		
-			
-		
-			break;
-		case '3':
-		
-			
-		
-		
-		
-		}
-		
-	}
-
+void parse() {
+    int i;
+    for(i=0; i<ARENA_SIZE; i++){
+        switch (a_map[i]) {
+            case '#':
+                mu_parsed_map[i] = border;
+                break;
+            case ' ':
+                mu_parsed_map[i] = empty;
+                break;
+            case 'S':
+                mu_parsed_map[i] = start;
+                break;
+            case '1':
+                mu_parsed_map[i] = table_1;
+                break;
+            case '2':
+                mu_parsed_map[i] = table_2;
+                break;
+            case '3':
+                mu_parsed_map[i] = table_3;
+                break;
+        }
+    }
 }
 
-#endif // PARSER
