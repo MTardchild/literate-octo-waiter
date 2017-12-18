@@ -1,4 +1,3 @@
-#include "defines.nxc"
 #include "parser.nxc"
 #include "mapping.nxc"
 #include "pathfinding.nxc"
