@@ -1,3 +1,6 @@
+#ifndef OCTA_ADJUSTMENT_CONTROLLER_H
+#define OCTA_ADJUSTMENT_CONTROLLER_H
+
 #define kp 0.6
 #define ki 0.1
 #define kd 0.0
@@ -94,3 +97,5 @@ task main() {
      oldRotCount = rotCount;
   }
 }
+
+#endif // OCTA_ADJUSTMENT_CONTROLLER_H

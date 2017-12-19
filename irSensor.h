@@ -1,3 +1,6 @@
+#ifndef OCTA_IR_SENSOR_H
+#define OCTA_IR_SENSOR_H
+
 int readSensor() {
 	return getDist(SensorRaw(IRSENSOR_PORT));
 }
@@ -26,3 +29,5 @@ int getDist(int val){
     
     return dist[i]*100 - (dist_diff*100 / sens_diff * val);
 }
+
+#endif // OCTA_IR_SENSOR_H
