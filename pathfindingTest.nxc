@@ -1,0 +1,36 @@
+//
+// Created by tscharntke on 15.12.2017.
+//
+
+#include "pathfinding.h"
+#include "parser.h"
+
+void print_path() {
+    byte row, i = 0;
+    char c;
+    while (c = pf_path[i++]) {
+        row = 56 - (i / 5 *8);
+        if (c == n)
+            TextOut((i%5)*10, row, "n, ");
+        else if (c == s)
+            TextOut((i%5)*10, row, "s, ");
+        else if (c == w)
+            TextOut((i%5)*10, row, "w, ");
+        else if (c == e)
+            TextOut((i%5)*10, row, "e, ");
+    }
+    Wait(10000);
+}
+
+task main(){
+
+    parse();
+
+    find_path(10, 7, starting_square);
+    find_path(1, 1, table_3);
+    find_path(1, 6, table_3);
+    find_path(10, 7, table_2);
+    find_path(1, 6, table_1);
+    find_path(1, 6, table_2);
+}
+

@@ -1,0 +1,42 @@
+//
+// Created by tscharntke on 15.12.2017.
+//
+
+#include "pathfinding.h"
+
+
+void print_path() {
+    int i = 0;
+    char c;
+    while (c = pf_path[i++]) {
+        if (c == n)
+            TextOut(i*3, LCD_LINE1, "n, ");
+        else if (c == s)
+            TextOut(i*3, LCD_LINE1, "s, ");
+        else if (c == w)
+            TextOut(i*3, LCD_LINE1, "w, ");
+        else if (c == e)
+            TextOut(i*3, LCD_LINE1, "e, ");
+    }
+    Wait(10000);
+}
+
+int main(){
+    parse();
+    find_path(10, 7, start);
+    print_path();
+    find_path(1, 1, table_3);
+    print_path();
+    find_path(1, 6, table_3);
+    print_path();
+    find_path(10, 7, table_2);
+    print_path();
+    find_path(1, 6, table_1);
+    print_path();
+    find_path(1, 6, table_2);
+
+    print_path();
+
+
+}
+
