@@ -1,3 +1,4 @@
 *.sym
 *.bak
+*.swp
 pytest
