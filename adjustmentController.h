@@ -11,6 +11,18 @@
 #define SOCKELWERT 20
 #define p_regler(ist) ((SOLL-ist) * kp)
 
+/*
+ *  Stores the smoothness passed as parameter to an interface function (0 - 255).
+ *  This is needed because parameters can not be passed into tasks.
+ */
+byte smoothness = -1;
+
+/*
+ *  Stores the power used to control the engines passed as parameter to 
+ *  an interface function (0 - 100). 
+ *  This is needed because parameters can not be passed into tasks.
+ */
+byte power = -1;
 
 int i_regler(int ist)
 {
@@ -43,7 +55,39 @@ int pid_regler(int ist)
   return p_regler(ist) + d_regler(ist) + i_regler(ist);
 }
 
+/*
+ *  Drives in currently facing direction. Default power value.
+ *
+ *  smoothness: Determines how smooth the motion should be (0 - 255).
+ *  distance: Determines the distance of the drive (in mm).
+ */
+void move(byte smoothness, unsigned int distance);
 
+/*
+ *  Drives in currently facing direction.
+ *
+ *  smoothness: Determines how smooth the motion should be (0 - 255).
+ *  power: Determines the power (in %) used to control the engines (0 - 100).
+ *  distance: Determines the distance of the drive (in mm).
+ */
+void movePower(byte smoothness, byte power, unsigned int distance); 
+
+/*
+ *  Turns the robot so that it faces the given direction. Default power value.
+ *
+ *  smoothness: Determines how smooth the motion should be (0 - 255).
+ *  direction: Determines the direction the robot should face afterwards. (0 - 359)
+ */
+void turn(byte smoothness, unsigned short direction);
+
+/*
+ *  Turns the robot so that it faces the given direction.
+ *
+ *  direction: Determines the direction the robot should face afterwards. (0 - 359)
+ *  power: Determines the power (in %) used to control the engines (0 - 100).
+ *  smoothness: Determines how smooth the motion should be (0 - 255).
+ */
+void turnPower(byte smoothness, byte power, unsigned short direction);
 
 void start_drive(){
 
@@ -75,7 +119,12 @@ void turn(int dir){
 
 }
 
+/*
+ *  Returns: Distance (in mm) driven since the engine power on.
+ */
+int getDistanceDriven() {
 
+}
 	
 task main() {
   long rotCount, oldRotCount;

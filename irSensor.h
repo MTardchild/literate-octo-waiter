@@ -1,20 +1,24 @@
 #ifndef OCTA_IR_SENSOR_H
 #define OCTA_IR_SENSOR_H
 
-int readSensor() {
-	return getDist(SensorRaw(IRSENSOR_PORT));
+#define IR_SENSOR_PORT S1
+
+/*
+ *  Returns: Distance (in mm) of next obstacle in LoS (500 - 8000).
+ */
+int getDistanceIr() {
+	return calculateDistance(SensorRaw(IR_SENSOR_PORT));
 }
 
-void output(int val) {
-     float f_val = val;	
-     f_val /= 100;
-     NumOut(0, LCD_LINE1, f_val);
-}
-
-int getDist(int val){
-    int sens[9] = {780,560,400,320,280,260,240,220,210};
-    int dist[9] = {5	,10,	20,	30,	40,	50,	60,	70,	80 };
-
+/*
+ *  Maps the raw value to mm.
+ *
+ *  val: Raw sensor output.
+ *  Returns: Distance to obstacle in mm.
+ */
+int calculateDistance(int val){
+    int sens[9] = {780, 560, 400, 320, 280, 260, 240, 220, 210};
+    int dist[9] = {5, 10, 20, 30, 40, 50, 60, 70, 80};
 
     int i = 0;
     while(sens[i] > val && i < 8) i++;

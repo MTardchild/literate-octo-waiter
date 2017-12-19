@@ -2,7 +2,7 @@
 // Created by tscharntke on 15.12.2017.
 //
 
-#include "pathfinding.h"
+#include "pathfinder.h"
 #include "parser.h"
 
 void print_path() {
