@@ -28,8 +28,10 @@ int rpmC = 0;
 int readRpm(byte motor) {
 	long static oldRotationCount = MotorRotationCount(motor);
 	long rotationCount = MotorRotationCount(motor);
-	int rpm = (rotationCount - oldRotationCount) / T * 60 / 360;
+	float rpm = (rotationCount - oldRotationCount) / T * 60 / 360;
 	oldRotationCount = rotationCount;
+	
+	return rpm;
 }
 
 /*
@@ -57,10 +59,10 @@ void storeRpm(byte motor, int rpm) {
  */
 task checkRpm() {
 	while(1) {
-		Wait(200);
-		readRpm(OUT_A);
-		readRpm(OUT_B);
-		readRpm(OUT_C);
+		Wait(1000 * T);
+		storeRpm(OUT_A, readRpm(OUT_A));
+		storeRpm(OUT_B, readRpm(OUT_B));
+		storeRpm(OUT_C, readRpm(OUT_C));
 	}
 }
 
