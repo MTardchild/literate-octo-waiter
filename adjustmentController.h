@@ -9,7 +9,7 @@
 
 #define SOLL 35
 #define SOCKELWERT 20
-#define p_regler(ist) ((SOLL-ist) * kp)
+#define pController(ist) ((SOLL-ist) * kp)
 
 /*
  *  Stores the smoothness passed as parameter to an interface function (0 - 255).
@@ -24,14 +24,14 @@ byte smoothness = -1;
  */
 byte power = -1;
 
-int i_regler(int ist)
+int iController(int ist)
 {
   static int s = 0;
   s += (SOLL - ist);
   return ki * T * s;
 }
 
-int d_regler(int ist)
+int dController(int ist)
 {
   static int delta_alt = 0;
   int a = kd * (SOLL-ist - delta_alt) / T;
@@ -40,19 +40,19 @@ int d_regler(int ist)
   return a;
 }
 
-int pi_regler(int ist)
+int piController(int ist)
 {
-  return p_regler(ist) + i_regler(ist);
+  return pController(ist) + i_regler(ist);
 }
 
-int pd_regler(int ist)
+int pdController(int ist)
 {
-  return p_regler(ist) + d_regler(ist);
+  return pController(ist) + d_regler(ist);
 }
 
-int pid_regler(int ist)
+int pidController(int ist)
 {
-  return p_regler(ist) + d_regler(ist) + i_regler(ist);
+  return pController(ist) + d_regler(ist) + i_regler(ist);
 }
 
 /*
@@ -139,9 +139,9 @@ task main() {
      TextOut(0, LCD_LINE2, "    ");
      int rpm = (rotCount - oldRotCount) / T * 60 / 360;
      NumOut(0, LCD_LINE2, rpm);
-     power += pi_regler(rpm);
+     power += piController(rpm);
      //OnFwd(OUT_A, power);
-     OnFwd(OUT_A, SOCKELWERT + pid_regler(rpm));
+     OnFwd(OUT_A, SOCKELWERT + pidController(rpm));
 
      oldRotCount = rotCount;
   }

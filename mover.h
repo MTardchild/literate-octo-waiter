@@ -4,14 +4,14 @@
 #define EPSILON_DIRECTION 0.5
 
 /*
- *  Stores the current step the robot is in (0 - MAX_PATH_SIZE).
+ *  Stores the actual step the robot is in (0 - MAX_PATH_SIZE).
  *  This essentially keeps track of pf_path[].
  */
 byte currentStep = -1;
 
 /*
- *  true: Robot is currently in the process of turning.
- *  false: Robot is currently not turning.
+ *  true: Robot is actually in the process of turning.
+ *  false: Robot is actually not turning.
  */
 bool isTurning = false;
 
@@ -23,14 +23,14 @@ bool isTurning = false;
 byte stopCause = 0;
 
 /*
- *  Stores the direction the robot is currently facing (0 - 359).
+ *  Stores the direction the robot is actually facing (0 - 359).
  *
  *  0: North // 45: North-East
  *  90: East // 135: South-East
  *  180: South // 225: South-West
  *  270: West // 315: North-West
  */
-short currentDirection = -1;
+short actualDirection = -1;
 
 /*
  *  Stores the target direction of the turning motion (0 - 359).
@@ -45,7 +45,7 @@ short targetDirection = -1;
 /*
  *  Stores the already driven distance since engine turn on.
  */
-int currentDistance = -1;
+int actualDistance = -1;
 
 /*
  *  Stores the distance that has to be driven.
@@ -68,7 +68,7 @@ void movePath();
 /*
  *  Called when the compass sensor reports a new value.
  *
- *  newDirection: Direction the robot currently faces (0 - 359).
+ *  newDirection: Direction the robot actually faces (0 - 359).
  */
 void onDirectionChanged(short newDirection);
 
@@ -111,7 +111,7 @@ void onDistanceDrivenChanged(short newDistance) {
         // Stop
     } 
 
-    currentDistance = newDistance;
+    actualDistance = newDistance;
 }
 
 void onDistanceIrChanged(short newDistance) {
@@ -131,16 +131,16 @@ void onDirectionChanged(short newDirection) {
             // stop
         } 
     } else {
-        if (currentDirection > newDirection + EPSILON_DIRECTION) {
+        if (actualDirection > newDirection + EPSILON_DIRECTION) {
             isTurning = true;
             // turn right
-        } else if (currentDirection < newDirection - EPSILON_DIRECTION) {
+        } else if (actualDirection < newDirection - EPSILON_DIRECTION) {
             isTurning = true;
             // turn left
         }
     }
 
-    currentDirection = newDirection;
+    actualDirection = newDirection;
 }
 
 #endif // OCTA_MOVER_H
