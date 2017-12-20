@@ -17,7 +17,7 @@ int se_distanceIr = -1;
 /*
  *  Last calculated distance driven since engine power on.
  */
-int se_distanceDriven = -1;
+int se_rpm = -1;
 
 /*
  *  Last measured direction.
@@ -28,18 +28,17 @@ task checkSensors() {
     while(true) {
         Wait(100);
         if (distanceIr != getDistanceIr()) {
-            distanceIr = getDistanceIr();
-            setEvent(DistanceIrChanged);
+			se_distanceIr = getDistanceIr();
         } 
         
         if (distanceDriven != getDistanceDriven()) {
-            distanceDriven = getDistanceDriven();
-            setEvent(DistanceDrivenChanged);
+            se_rpm_a = getRpm(OUT_A);
+			se_rpm_b = getRpm(OUT_B);
+			se_rpm_c = getRpm(OUT_C);
         } 
         
         if (direction != getCompassDirection()) {
-            direction = getCompassDirection();
-            setEvent(DirectionChanged);
+            se_direction = getCompassDirection();
         }
     }
 }
