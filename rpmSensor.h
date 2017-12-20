@@ -1,7 +1,7 @@
 #ifndef OCTA_RPM_SENSOR
 #define OCTA_RPM_SENSOR
 
-#define T 0.2
+#define T 0.1
 
 /*
  *	RPM of OUT_A
