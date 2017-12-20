@@ -1,69 +1,88 @@
 #ifndef OCTA_ADJUSTMENT_CONTROLLER_H
 #define OCTA_ADJUSTMENT_CONTROLLER_H
 
-#define kp 0.6
-#define ki 0.1
-#define kd 0.0
-
-#define T 0.3
-
-#define SOLL 35
-#define SOCKELWERT 20
-#define pController(ist) ((SOLL-ist) * kp)
-#define EPSILON_DIRECTION 0.5
+#define kp 0.0006
+#define ki 0.0001
+#define kd 0.0001
 
 
+/*
+* pController	
+* target: target rpm
+* current: current rpm
+* returns the new power value
+*/
+#define pController(target, current) ((target-current) * kp)
 
-int iController(int ist)
+/*
+* 
+* out: the engine number	
+* target: target rpm
+* current: current rpm
+* T: time since last call
+* returns the new power value
+*/
+
+
+int iControllerA(int target, int current, int s)
 {
   static int s = 0;
-  s += (SOLL - ist);
+  s += (target - current);
   return ki * T * s;
 }
 
-int dController(int ist)
+int dControllerA(int target, int current, int T)
 {
-  static int delta_alt = 0;
-  int a = kd * (SOLL-ist - delta_alt) / T;
-  delta_alt = SOLL - ist;
-
+  static int old_delta = 0;
+  int a = kd * (target-current - old_delta) / T;
+  old_delta = target - current;
   return a;
 }
 
-int piController(int ist)
+int iControllerB(int target, int current, int s)
 {
-  return pController(ist) + i_regler(ist);
+  static int s = 0;
+  s += (target - current);
+  return ki * T * s;
 }
 
-int pdController(int ist)
+int dControllerB(int target, int current, int T)
 {
-  return pController(ist) + d_regler(ist);
+  static int old_delta = 0;
+  int a = kd * (target-current - old_delta) / T;
+  old_delta = target - current;
+  return a;
 }
 
-int pidController(int ist)
+int iControllerC(int target, int current, int s)
 {
-  return pController(ist) + d_regler(ist) + i_regler(ist);
+  static int s = 0;
+  s += (target - current);
+  return ki * T * s;
 }
 
-task main() {
-  long rotCount, oldRotCount;
-  int power = 0;
+int dControllerC(int target, int current, int T)
+{
+  static int old_delta = 0;
+  int a = kd * (target-current - old_delta) / T;
+  old_delta = target - current;
+  return a;
+}
 
-  oldRotCount = MotorRotationCount(OUT_A);
+inline int piController(int target, int current, int T)
+{
+  return pController(current, T) + iController(current, T);
+}
 
-  while (1) {
-     Wait(T*1000);
+inline int pdController(int target, int current, int T)
+{
+  return pController(target, current, T) + dController(target, current, T);
+}
 
-     rotCount = MotorRotationCount(OUT_A);
-     TextOut(0, LCD_LINE2, "    ");
-     int rpm = (rotCount - oldRotCount) / T * 60 / 360;
-     NumOut(0, LCD_LINE2, rpm);
-     power += piController(rpm);
-     //OnFwd(OUT_A, power);
-     OnFwd(OUT_A, SOCKELWERT + pidController(rpm));
-
-     oldRotCount = rotCount;
-  }
+inline int pidController(int target, int current, int T)
+{
+  return pController(target, current) + dController(target, current, T) + iController(target, current, T);
 }
 
 #endif // OCTA_ADJUSTMENT_CONTROLLER_H
+
