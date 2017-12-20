@@ -107,11 +107,12 @@ void movePath() {
         consecutiveSameDirections = 1;
         if (isFacingDirection(pf_path[currentStep]) {
             ++currentStep;
-            if () {
+            while(isFacingDirection(pf_path[currentStep]) {
                 ++consecutiveSameDirections;
-            } else {
-                // move consecutiveSameDirections squares forward
+                ++currentStep;
             }
+
+            // move consecutiveSameDirections squares forward
         } else {
             // turn to target direction
         }
@@ -142,8 +143,7 @@ void onDistanceIrChanged(short newDistance) {
 
 void onDirectionChanged(short newDirection) {
     if (isTurning) {
-        if (newDirection >= targetDirection + EPSILON_DIRECTION
-            || newDirection <= targetDirection - EPSILON_DIRECTION) {
+        if (isFacingDirection(newDirection)) {
             isTurning = false;
             // stop
         } 
