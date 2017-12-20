@@ -1,3 +1,6 @@
+#ifndef OCTA_TIMER_H
+#define OCTA_TIMER_H
+
 #define timerCount 5
 #define TimerType unsigned int
 
@@ -48,3 +51,5 @@ task checkTimers() {
          }
     }
 }
+
+#endif // OCTA_TIMER_H

@@ -1,7 +1,4 @@
-#include "parser.nxc"
-#include "mapping.nxc"
-#include "pathfinding.nxc"
-#include "movement.nxc"
+
 
 task main() {
 	#ifdef parse

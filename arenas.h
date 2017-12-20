@@ -5,12 +5,14 @@
 #ifndef OCTA_ARENAS_H
 #define OCTA_ARENAS_H
 
-#include "octa_util.h"
+#include "octaUtil.h"
 
 
 #define ARENA_SIZE 196
 #define a_map default_map
-string default_map;
+
+
+string default_map = "###############     S      ###   #####   ##    11      ##            ##   ####   2 ##      #   2 ##      #     ##   ###########   #        ##   #   33   ##   #        ##            ###############";
 
 
 #endif //OCTA_ARENAS_H

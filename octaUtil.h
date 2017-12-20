@@ -7,11 +7,11 @@
 
 #ifdef __C
 #define byte unsigned char
-#endif
+
 
 #define bool byte
 #define True 1
 #define False 0
-
+#endif
 
 #endif //OCTA_OCTA_UTIL_H
