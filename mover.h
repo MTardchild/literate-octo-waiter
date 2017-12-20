@@ -103,7 +103,24 @@ task mo_checkEvents() {
 }
 
 void movePath() {
+    while (currentStep != MAX_PATH_SIZE) {
+        consecutiveSameDirections = 1;
+        if (isFacingDirection(pf_path[currentStep]) {
+            ++currentStep;
+            if () {
+                ++consecutiveSameDirections;
+            } else {
+                // move consecutiveSameDirections squares forward
+            }
+        } else {
+            // turn to target direction
+        }
+    }
+}
 
+bool isFacingDirection(short direction) {
+    return actualDirection >= direction - EPSILON_DIRECTION
+        && actualDirection <= direction + EPSILON_DIRECTION;
 }
 
 void onDistanceDrivenChanged(short newDistance) {
