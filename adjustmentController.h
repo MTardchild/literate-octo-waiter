@@ -26,17 +26,18 @@ int pidController(int out, int target, int current);
 
 /*
 * Utility function.
-* Required set up for setUpTimer(). 
+* Required set up for getTimeSinceLastCall(). 
 */
-#define setUpTimer() \
+#define setUpLocalTimer() \
   static unsigned long ticks = CurrentTick();                               \
   unsigned long last_called = ticks;                                        \
   ticks = CurrentTick();                                                    \
 
 /*
-* Must be used after a call to setUpTimer!
+* Must be used after a call to setUpLocalTimer!
 * Returns the time since the last call to the function this is called in 
 * in milliseconds.
+* Returns 0 in the 1st call
 */  
 #define getTimeSinceLastCall() (ticks-last_called)
 
@@ -63,7 +64,7 @@ int x##Controller(int out, int target, int current){                        \
 int iController##x(int target, int current)                                 \
 {                                                                           \
   static int s = 0;                                                         \
-  setUpTimer();                                                             \
+  setUpLocalTimer();                                                        \
   s += (target - current);                                                  \
   return ki * getTimeSinceLastCall() * s;                                   \
 }
@@ -84,7 +85,7 @@ iMacro(C);
 int dController##x(int target, int current)                                 \
 {                                                                           \
   static int old_delta = 0;                                                 \
-  setUpTimer();                                                             \
+  setUpLocalTimer();                                                        \
   int a = kd * (target-current - old_delta) / getTimeSinceLastCall();       \
   old_delta = target - current;                                             \
   return a;                                                                 \
@@ -97,9 +98,6 @@ dMacro(A);
 dMacro(B);
 dMacro(C);
 #undef dMacro
-
-#undef getTimeSinceLastCall
-#undef setUpTimer
 
 /*
 * Build xController functions, where x is one of [pid, pi, pd]
@@ -120,7 +118,7 @@ controllerMacro(pid);
 #undef pidMacro
 
 #undef controllerMacro
-#undef setUpTimer
+#undef setUpLocalTimer
 #undef getTimeSinceLastCall
 
 
