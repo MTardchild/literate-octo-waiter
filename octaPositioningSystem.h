@@ -21,6 +21,11 @@ byte x;
  */
 byte y;
 
+
+/*
+ *	the direction waiter is facing in degrees (0-359)
+ *  0 = North
+ */
 int direction;
 
 task calculatePosition() {

@@ -1,88 +1,128 @@
 #ifndef OCTA_ADJUSTMENT_CONTROLLER_H
 #define OCTA_ADJUSTMENT_CONTROLLER_H
 
+// parameters constants to adjust smoothness
 #define kp 0.0006
 #define ki 0.0001
 #define kd 0.0001
 
 
+// public prototypes
+
 /*
-* pController	
+* Implements various controller types
+* out: engine number
 * target: target rpm
 * current: current rpm
-* returns the new power value
+* returns the new power value, for that engine
 */
 #define pController(target, current) ((target-current) * kp)
+int piController(int out, int target, int current);
+int pdController(int out, int target, int current);
+int pidController(int out, int target, int current);
+
+
+// crazy macros starting here
 
 /*
-* 
-* out: the engine number	
-* target: target rpm
-* current: current rpm
-* T: time since last call
-* returns the new power value
+* Utility function.
+* Required set up for setUpTimer(). 
 */
+#define setUpTimer() \
+  static unsigned long ticks = CurrentTick();                               \
+  unsigned long last_called = ticks;                                        \
+  ticks = CurrentTick();                                                    \
 
+/*
+* Must be used after a call to setUpTimer!
+* Returns the time since the last call to the function this is called in 
+* in milliseconds.
+*/  
+#define getTimeSinceLastCall() (ticks-last_called)
 
-int iControllerA(int target, int current, int s)
-{
-  static int s = 0;
-  s += (target - current);
-  return ki * T * s;
+/*
+* Macro to avoid copy pasta for different controller types
+*/
+#define controllerMacro(x)  \
+int x##Controller(int out, int target, int current){                        \
+    switch (out){                                                           \
+    case OUT_A:                                                             \
+        x##Macro(A);                                                        \
+    case OUT_B:                                                             \
+        x##Macro(B);                                                        \
+    case OUT_C:                                                             \
+        x##Macro(C);                                                        \
+    }                                                                       \
 }
 
-int dControllerA(int target, int current, int T)
-{
-  static int old_delta = 0;
-  int a = kd * (target-current - old_delta) / T;
-  old_delta = target - current;
-  return a;
+/*
+* Macro to avoid copy pasta for different engines 
+* Used to create one iController function per engine
+*/
+#define iMacro(x)  \
+int iController##x(int target, int current)                                 \
+{                                                                           \
+  static int s = 0;                                                         \
+  setUpTimer();                                                             \
+  s += (target - current);                                                  \
+  return ki * getTimeSinceLastCall() * s;                                   \
 }
 
-int iControllerB(int target, int current, int s)
-{
-  static int s = 0;
-  s += (target - current);
-  return ki * T * s;
+/*
+* Build iControllerx functions, where x is one of [A, B, C]
+*/
+iMacro(A);
+iMacro(B);
+iMacro(C);
+#undef iMacro
+
+/*
+* Macro to avoid copy pasta for different engines 
+* Used to create one dController function per engine
+*/
+#define dMacro(x)  \
+int dController##x(int target, int current)                                 \
+{                                                                           \
+  static int old_delta = 0;                                                 \
+  setUpTimer();                                                             \
+  int a = kd * (target-current - old_delta) / getTimeSinceLastCall();       \
+  old_delta = target - current;                                             \
+  return a;                                                                 \
 }
 
-int dControllerB(int target, int current, int T)
-{
-  static int old_delta = 0;
-  int a = kd * (target-current - old_delta) / T;
-  old_delta = target - current;
-  return a;
-}
+/*
+* Build dControllerx functions, where x is one of [A, B, C]
+*/
+dMacro(A);
+dMacro(B);
+dMacro(C);
+#undef dMacro
 
-int iControllerC(int target, int current, int s)
-{
-  static int s = 0;
-  s += (target - current);
-  return ki * T * s;
-}
+#undef getTimeSinceLastCall
+#undef setUpTimer
 
-int dControllerC(int target, int current, int T)
-{
-  static int old_delta = 0;
-  int a = kd * (target-current - old_delta) / T;
-  old_delta = target - current;
-  return a;
-}
+/*
+* Build xController functions, where x is one of [pid, pi, pd]
+*/
+#define piMacro(x) \
+    return pController(target, current) + dController##x(target, current)
+controllerMacro(pi);
+#undef piMacro
 
-inline int piController(int target, int current, int T)
-{
-  return pController(current, T) + iController(current, T);
-}
+#define pdMacro(x) \
+    return pController(target, current) + dController##x(target, current)
+controllerMacro(pd);
+#undef pdMacro
 
-inline int pdController(int target, int current, int T)
-{
-  return pController(target, current, T) + dController(target, current, T);
-}
+#define pidMacro(x) \
+    return pController(target, current) + iController##x(target, current) + dController##x(target, current)
+controllerMacro(pid);
+#undef pidMacro
 
-inline int pidController(int target, int current, int T)
-{
-  return pController(target, current) + dController(target, current, T) + iController(target, current, T);
-}
+#undef controllerMacro
+#undef setUpTimer
+#undef getTimeSinceLastCall
+
 
 #endif // OCTA_ADJUSTMENT_CONTROLLER_H
 
