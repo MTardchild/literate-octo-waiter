@@ -1,116 +1,70 @@
 #ifndef OCTA_MOVER_H
 #define OCTA_MOVER_H
 
-/*
- *  Stores the current step the robot is in (0 - MAX_PATH_SIZE).
- *  This essentially keeps track of pf_path[].
- */
-byte currentStep = -1;
-
 /* 
  *  Moves the path calculated by pathfinder.
  *  Default smoothness and power values.
  */
 void movePath();
 
-
-/*
- *  Stores the target direction of the turning motion (0 - 359).
- *
- *  0: North // 45: North-East
- *  90: East // 135: South-East
- *  180: South // 225: South-West
- *  270: West // 315: North-West
- */
-short targetDirection = -1;
-
 /*
  *  Drives in currently facing direction. Default power value.
  *
- *  smoothness: Determines how smooth the motion should be (0 - 255).
- *  distance: Determines the distance of the drive (in mm).
+ *  distance: Determines how far the robot should be driving (1 - 12)
+ *  smooth: Determines if the motion should be smooth (true/false).
  */
-void move(byte smoothness, unsigned int distance);
+void goStraight(byte distance, byte smooth){
 
-/*
- *  Drives in currently facing direction.
- *
- *  smoothness: Determines how smooth the motion should be (0 - 255).
- *  power: Determines the power (in %) used to control the engines (0 - 100).
- *  distance: Determines the distance of the drive (in mm).
- */
-void movePower(byte smoothness, byte power, unsigned int distance); 
+
+}
 
 /*
  *  Turns the robot so that it faces the given direction. Default power value.
  *
- *  smoothness: Determines how smooth the motion should be (0 - 255).
- *  direction: Determines the direction the robot should face afterwards. (0 - 359)
- */
-void turn(byte smoothness, unsigned short direction);
-
-/*
- *  Turns the robot so that it faces the given direction.
  *
- *  direction: Determines the direction the robot should face afterwards. (0 - 359)
- *  power: Determines the power (in %) used to control the engines (0 - 100).
- *  smoothness: Determines how smooth the motion should be (0 - 255).
+ *  direction: Determines the direction the robot should face afterwards. (1 - 4)
+ *  smooth: Determines if the motion should be smooth (true/false).
  */
-void turnPower(byte smoothness, byte power, unsigned short direction);
-
-void start_drive(){
-
-
-}
-
-void stop_drive(){
-
-
-}
-
-void drive(int dist){
+void turn(byte direction, byte smooth){
 	
 
 }
-
-void start_turn(int dir){
-
-
+/*
+*  Converts path style directions (1 - 4) to ops style degrees (0 - 359)
+*
+*  direction: direction to be converted
+*/
+int convertToDeg(byte direction){
+	direction -= 1;
+	return direction * 90;
 }
 
-void stop_turn(int dir){
-
-
-}
-
-void turn(int dir){
-	
-
-}
-
+// THIS DOES NOT WORK
 bool isFacingDirection(short direction) {
-    return actualDirection >= direction - EPSILON_DIRECTION
-        && actualDirection <= direction + EPSILON_DIRECTION;
+	direction = convertToDeg(direction)
+    return ops_direction >= ((direction - EPSILON_DIRECTION) % 360)
+        && ops_direction <= ((direction + EPSILON_DIRECTION) % 360) ;
 }
 
 /*
- *  Returns: Distance (in mm) driven since the engine power on.
+ *  Returns: If the path has been finished
  */
+#define isOver(currentStep) (currentStep != MAX_PATH_SIZE && pf_path[currentStep] != 0)
 
-
-void movePath() {
-    while (currentStep != MAX_PATH_SIZE) {
+ 
+void movePath(bool smooth) {
+	int currentStep = 0;
+    while (!isOver(currentStep) {
         consecutiveSameDirections = 1;
         if (isFacingDirection(pf_path[currentStep]) {
             ++currentStep;
-            while(isFacingDirection(pf_path[currentStep]) {
+            while(isFacingDirection(pf_path[currentStep]) && !isOver(currentStep){
                 ++consecutiveSameDirections;
                 ++currentStep;
             }
-
-            // move consecutiveSameDirections squares forward
+            go_straight(consecutiveSameDirections, smooth)
         } else {
-            // turn to target direction
+            turn(pf_path[currentStep], smooth)
         }
     }
 }
