@@ -17,9 +17,9 @@
 * returns the new power value, for that engine
 */
 #define pController(target, current) ((target-current) * kp)
-int piController(int out, int target, int current);
-int pdController(int out, int target, int current);
-int pidController(int out, int target, int current);
+int piController(int out, float target, float current);
+int pdController(int out, float target, float current);
+int pidController(int out, float target, float current);
 
 
 // crazy macros starting here
@@ -45,7 +45,7 @@ int pidController(int out, int target, int current);
 * Macro to avoid copy pasta for different controller types
 */
 #define controllerMacro(x)  \
-int x##Controller(int out, int target, int current){                        \
+int x##Controller(int out, float target, float current){                        \
     switch (out){                                                           \
     case OUT_A:                                                             \
         x##Macro(A);                                                        \
@@ -61,9 +61,9 @@ int x##Controller(int out, int target, int current){                        \
 * Used to create one iController function per engine
 */
 #define iMacro(x)  \
-int iController##x(int target, int current)                                 \
+int iController##x(float target, float current)                                 \
 {                                                                           \
-  static int s = 0;                                                         \
+  static float s = 0;                                                         \
   setUpLocalTimer();                                                        \
   s += (target - current);                                                  \
   return ki * getTimeSinceLastCall() * s;                                   \
@@ -82,9 +82,9 @@ iMacro(C);
 * Used to create one dController function per engine
 */
 #define dMacro(x)  \
-int dController##x(int target, int current)                                 \
+int dController##x(float target, float current)                                 \
 {                                                                           \
-  static int old_delta = 0;                                                 \
+  static float old_delta = 0;                                                 \
   setUpLocalTimer();                                                        \
   int a = kd * (target-current - old_delta) / getTimeSinceLastCall();       \
   old_delta = target - current;                                             \
