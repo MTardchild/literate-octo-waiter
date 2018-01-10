@@ -6,17 +6,17 @@
 /*
  *	RPM of OUT_A
  */
-int rpmA = 0;
+float rpmA = 0;
 
 /*
  *	RPM of OUT_B
  */
-int rpmB = 0;
+float rpmB = 0;
 
 /*
  *	RPM of OUT_C
  */
-int rpmC = 0;
+float rpmC = 0;
 
 /*
  *	Reads rotation count of given motor and calculates
@@ -25,7 +25,7 @@ int rpmC = 0;
  *	motor: motor in hex
  *	returns: rpm of motor
  */
-int readRpm(byte motor) {
+float readRpm(byte motor) {
 	long static oldRotationCount = MotorRotationCount(motor);
 	long rotationCount = MotorRotationCount(motor);
 	float rpm = (rotationCount - oldRotationCount) / T * 60 / 360;
@@ -40,7 +40,7 @@ int readRpm(byte motor) {
  *	motor: motor in hex
  *	rpm: rpm of motor
  */
-void storeRpm(byte motor, int rpm) {
+void storeRpm(byte motor, float rpm) {
 	switch(motor) {
 		case OUT_A:
 			rpmA = rpm;
