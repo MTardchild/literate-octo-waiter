@@ -68,7 +68,16 @@ task calculatePosition() {
  *	Adds given distance to x and y coordinates.
  */
 void addDistance(int distanceX, int distanceY) {
-	ops_x += distanceX;
+    int tempX = ops_x + distanceX;
+    int tempY = ops_y + distanceY;
+
+	if (tempX > 255) ++ops_xSquare;
+    else if (tempX < 0) --ops_xSquare;
+
+    if (tempY > 255) ++ops_ySquare;
+    else if (tempY < 0) --ops_ySquare;
+
+    ops_x += distanceX;
 	ops_y += distanceY;
 }
 
@@ -78,10 +87,25 @@ void addDistance(int distanceX, int distanceY) {
 void dpmToDistance(float dpmA, float dpmB) {
 	float average = (dpmA + dpmB) / 2;
 	float distance = average * OPS_CALC_FREQUENCY / 1000;
-	// TODO: check for sign
+    int signX = getDirectionSignX();
+    int signY = getDirectionSignY();
 	float ratioX = getRatioX();
 	float ratioY = 1 - ratioX;
-	addDistance(average * ratioX, average * ratioY);
+	addDistance(average * ratioX * signX, average * ratioY * signY);
+}
+
+/*
+ *  Returns whether the x component has to be decreased or increased.
+ */
+int getDirectionSignX() {
+    return ops_dir > 0 && ops_dir < 180 ? 1 : -1;
+}
+
+/*
+ *  Returns whether the y component has to be decreased or increased.
+ */
+int getDirectionSignY() {
+    return ops_dir > 270 || ops_dir < 90 ? 1 : -1;
 }
 
 /*
