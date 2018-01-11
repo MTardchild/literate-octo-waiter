@@ -26,7 +26,7 @@ float rpmC = 0;
  *	returns: rpm of motor
  */
 float readRpm(byte motor) {
-	long static oldRotationCount = MotorRotationCount(motor);
+	static long oldRotationCount = 0;
 	long rotationCount = MotorRotationCount(motor);
 	float rpm = (rotationCount - oldRotationCount) / T * 60 / 360;
 	oldRotationCount = rotationCount;
