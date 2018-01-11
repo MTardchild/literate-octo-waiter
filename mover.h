@@ -7,8 +7,8 @@
 
 #define TURN_EPSILON_ROUGH 5
 #define TURN_EPSILON_FINE 0.4
-#define DRIVE_EPSILON_ROUGH ??
-#define DRIVE_EPSILON_FINE ??
+#define DRIVE_EPSILON_ROUGH 30
+#define DRIVE_EPSILON_FINE 5
 
 #define GO_QUICK 35
 #define GO_SLOW 15
@@ -39,14 +39,14 @@ int convertToDeg(byte direction){
 #define max(x, y) ((x)>(y) ? (x) : (y))
 
 bool isFacingDirection(byte direction, float epsilon) {
-	x = min(direction, ops_dir);
-	y = max(direction, ops_dir)
+	byte x = min(direction, ops_dir);
+	byte y = max(direction, ops_dir);
 	x += (y - x > 180) ? 360 : 0;
 	return abs(y-x) < epsilon;
 }
 
 bool turnLeft(short direction){
-	direction += (abs(y - x) > 180) ? 360 : 0;
+	direction += (abs(direction - ops_dir) > 180) ? 360 : 0;
 	return (ops_dir - direction) > 0;
 }
 
@@ -58,16 +58,16 @@ bool turnLeft(short direction){
 
 /* 
  *  Moves the path calculated by pathfinder.
- *  Default smoothness and power values.
+ *  smooth: smooth or not.
  */
-void movePath();
+void movePath(bool smooth);
 
 /*calculats the target square in the current direction
 *
 */
 byte getTargetSquare(byte distance){
 	byte direction = convertFromDeg(ops_dir);
-	switch(direction)
+	switch(direction){
 	case n:
 		return ops_y - distance;
 	case e:
@@ -79,6 +79,7 @@ byte getTargetSquare(byte distance){
 	default:
 		//dunno
 		return 0;
+  }
 }
 
 /*
@@ -90,10 +91,12 @@ bool reachedTarget(byte target, float epsilon){
     byte current_square;
 	if (direction == n || direction == s){
         current_in_dir_value = ops_x;
-		current_squre = ops_xSquare;
-	else if (direction == e || direction == w)
+		current_square = ops_xSquare;
+		
+}	else if (direction == e || direction == w){
 		current_in_dir_value = ops_y;
         current_square = ops_ySquare;
+  }
     if (abs(current_in_dir_value - 128) < epsilon && current_square == target)
 		return true;
 	return false;	
@@ -109,24 +112,27 @@ void goStraight(byte distance, byte smooth){
 	byte targetSquare = getTargetSquare(distance); 
 	if(smooth){
 		while(!reachedTarget(targetSquare, DRIVE_EPSILON_ROUGH)){
-			OnFwd(OUT_A, pidController(OUT_A, GO_QUICK, rpmA);
-			OnFwd(OUT_B, pidController(OUT_B, GO_QUICK, rpmB);
+			OnFwd(OUT_A, pidController(OUT_A, GO_QUICK, rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, GO_QUICK, rpmB));
+			Wait(100);
 		}
 		while(!reachedTarget(targetSquare, DRIVE_EPSILON_FINE)){
-			OnFwd(OUT_A, pidController(OUT_A, GO_SLOW, rpmA);
-			OnFwd(OUT_B, pidController(OUT_B, GO_SLOW, rpmB);
+			OnFwd(OUT_A, pidController(OUT_A, GO_SLOW, rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, GO_SLOW, rpmB));
+			Wait(100);
 		}
 	}else{
 		while (!reachedTarget(targetSquare, DRIVE_EPSILON_FINE)){
-			OnFwd(OUT_A, pidController(OUT_A, GO_QUICK, rpmA);
-			OnFwd(OUT_B, pidController(OUT_B, GO_QUICK, rpmB);
+			OnFwd(OUT_A, pidController(OUT_A, GO_QUICK, rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, GO_QUICK, rpmB));
+			Wait(100);
 		}
 	}
 	Off(OUT_AB);
 }
 
-#define turnLeft  -1
-#define turnRight  1
+#define DIR_LEFT -1
+#define DIR_RIGHT 1
 
 /*
  *  Turns the robot so that it faces the given direction. Default power value.
@@ -138,25 +144,29 @@ void goStraight(byte distance, byte smooth){
  */
  
  void turn(byte direction, byte smooth){
-	direction = convertToDeg(direction)
+	direction = convertToDeg(direction);
+  int turnDir;
 	if(turnLeft(direction))
-		goTurn(direction, smooth, turnLeft);
+		turnDir = DIR_LEFT;
 	else
-		goTurn(direction, smooth, turnRight);
+		turnDir = DIR_RIGHT;
 	
 	if(smooth){
 		while(!isFacingDirection(direction, TURN_EPSILON_ROUGH)){
-			OnFwd(OUT_A, pidController(OUT_A, TURN_QUICK, rpmA * turnDir);
-			OnFwd(OUT_B, pidController(OUT_B, TURN_QUICK, rpmB * turnDir * -1);
+			OnFwd(OUT_A, pidController(OUT_A, TURN_QUICK, rpmA * turnDir));
+			OnFwd(OUT_B, pidController(OUT_B, TURN_QUICK, rpmB * turnDir * -1));
+			Wait(100);
 		}
 		while(!isFacingDirection(direction, TURN_EPSILON_FINE)){
-			OnFwd(OUT_A, pidController(OUT_A, TURN_SLOW, rpmA * turnDir);
-			OnFwd(OUT_B, pidController(OUT_B, TURN_SLOW, rpmB * turnDir * -1);
+			OnFwd(OUT_A, pidController(OUT_A, TURN_SLOW, rpmA * turnDir));
+			OnFwd(OUT_B, pidController(OUT_B, TURN_SLOW, rpmB * turnDir * -1));
+			Wait(100);
 		}
 	}else{
 		while (!isFacingDirection(direction, TURN_EPSILON_FINE)){
-			OnFwd(OUT_A, pidController(OUT_A, TURN_QUICK, rpmA * turnDir);
-			OnFwd(OUT_B, pidController(OUT_B, TURN_QUICK, rpmB * turnDir * -1);
+			OnFwd(OUT_A, pidController(OUT_A, TURN_QUICK, rpmA * turnDir));
+			OnFwd(OUT_B, pidController(OUT_B, TURN_QUICK, rpmB * turnDir * -1));
+			Wait(100);
 		}
 	}
 	Off(OUT_AB);
@@ -169,16 +179,17 @@ int getStart(){
 }    
 
 void movePath(bool smooth) {
+    byte consecutiveSameDirections;
     int currentStep = getStart();
-    while (!isOver(currentStep) {
+    while (!isOver(currentStep)) {
         consecutiveSameDirections = 1;
-        if (isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH) {
+        if (isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH)) {
             ++currentStep;
-            while(isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH) && !isOver(currentStep){
+            while(isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH) && !isOver(currentStep)){
                 ++consecutiveSameDirections;
                 ++currentStep;
             }
-            goStraight(consecutiveSameDirections, smooth)
+            goStraight(consecutiveSameDirections, smooth);
         } else {
             turn(pf_path[currentStep], smooth);
 			++currentStep;

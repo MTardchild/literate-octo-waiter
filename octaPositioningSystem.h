@@ -8,12 +8,12 @@
 /*
  *	x position (square wise)
  */
-byte ops_xSquare;
+byte ops_xSquare = 6;
 
 /*
  *	y position (square wise)
  */
-byte ops_ySquare;
+byte ops_ySquare = 1;
 
 /*
  *	x position inside square (0 - 255)
@@ -73,6 +73,16 @@ task calculatePosition() {
 		Wait(OPS_CALC_FREQUENCY);
 		dpmToAngle(dpmA, dpmB);	
 		dpmToDistance(dpmA, dpmB);
+#ifdef DEBUG
+		ClearLine(LCD_LINE1);
+		ClearLine(LCD_LINE2);
+		TextOut(50, LCD_LINE1, "X");
+		NumOut(0, LCD_LINE1, ops_xSquare);
+		NumOut(20, LCD_LINE1, ops_x);
+		TextOut(50, LCD_LINE2, "Y");
+		NumOut(0, LCD_LINE2, ops_ySquare);
+		NumOut(20, LCD_LINE2, ops_y);
+#endif
 	}
 }
 

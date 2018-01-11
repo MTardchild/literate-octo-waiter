@@ -26,19 +26,20 @@ int pidController(int out, float target, float current);
 
 /*
 * Utility function.
-* Required set up for getTimeSinceLastCall(). 
+* Required set up for getTimeSinceLastCall().
 */
 #define setUpLocalTimer() \
-  static unsigned long ticks = CurrentTick();                               \
+  static unsigned long ticks = 0;                                           \
+  if (!ticks) ticks = CurrentTick();                                        \
   unsigned long last_called = ticks;                                        \
   ticks = CurrentTick();                                                    \
 
 /*
 * Must be used after a call to setUpLocalTimer!
-* Returns the time since the last call to the function this is called in 
+* Returns the time since the last call to the function this is called in
 * in milliseconds.
 * Returns 0 in the 1st call
-*/  
+*/
 #define getTimeSinceLastCall() (ticks-last_called)
 
 /*
@@ -57,28 +58,28 @@ int x##Controller(int out, float target, float current){                        
 }
 
 /*
-* Macro to avoid copy pasta for different engines 
+* Macro to avoid copy pasta for different engines
 * Used to create one iController function per engine
 */
 #define iMacro(x)  \
 int iController##x(float target, float current)                                 \
 {                                                                           \
-  static float s = 0;                                                         \
+  static float sum = 0;                                                         \
   setUpLocalTimer();                                                        \
-  s += (target - current);                                                  \
-  return ki * getTimeSinceLastCall() * s;                                   \
+  sum += (target - current);                                                  \
+  return ki * getTimeSinceLastCall() * sum;                                   \
 }
 
 /*
 * Build iControllerx functions, where x is one of [A, B, C]
 */
-iMacro(A);
-iMacro(B);
-iMacro(C);
+iMacro(A)
+iMacro(B)
+iMacro(C)
 #undef iMacro
 
 /*
-* Macro to avoid copy pasta for different engines 
+* Macro to avoid copy pasta for different engines
 * Used to create one dController function per engine
 */
 #define dMacro(x)  \
@@ -94,9 +95,9 @@ int dController##x(float target, float current)                                 
 /*
 * Build dControllerx functions, where x is one of [A, B, C]
 */
-dMacro(A);
-dMacro(B);
-dMacro(C);
+dMacro(A)
+dMacro(B)
+dMacro(C)
 #undef dMacro
 
 /*
@@ -104,17 +105,17 @@ dMacro(C);
 */
 #define piMacro(x) \
     return pController(target, current) + dController##x(target, current)
-controllerMacro(pi);
+controllerMacro(pi)
 #undef piMacro
 
 #define pdMacro(x) \
     return pController(target, current) + dController##x(target, current)
-controllerMacro(pd);
+controllerMacro(pd)
 #undef pdMacro
 
 #define pidMacro(x) \
     return pController(target, current) + iController##x(target, current) + dController##x(target, current)
-controllerMacro(pid);
+controllerMacro(pid)
 #undef pidMacro
 
 #undef controllerMacro

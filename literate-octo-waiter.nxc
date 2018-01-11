@@ -1,9 +1,13 @@
+
+#define DEBUG
 #include "pathfinder.h"
 #include "parser.h"
 #include "mover.h"
 
+
 task main() {
      parse();
      find_path(1, 6, table_1);
-     movePath();
+     Precedes(checkRpm, calculatePosition);
+     movePath(true);
 }
