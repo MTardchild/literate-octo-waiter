@@ -1,6 +1,8 @@
 #ifndef OCTA_POSITIONING_SYSTEM_H
 #define OCTA_POSITIONING_SYSTEM_H
 
+#include "rpmSensor.h"
+
 #define OPS_CALC_FREQUENCY 100
 
 /*
@@ -49,6 +51,16 @@ const float turnConst = 114.591559026;
  *	Distance between the middle of the wheels in cm.
  */
 const float wheelBase = 10.2;
+
+task calculatePosition(); 
+void addDistance(int distanceX, int distanceY);
+void dpmToDistance(float dpmA, float dpmB); 
+int getDirectionSignX();
+int getDirectionSignY();
+float getRatioX();
+void addDirection(float value);
+void dpmToAngle(float dpmA, float dpmB);
+float rpmToDpm(byte motor); 
 
 /*
  *	Calculates the current position and writes result into global variables. 
