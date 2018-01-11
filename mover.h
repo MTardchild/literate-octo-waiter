@@ -2,6 +2,8 @@
 #define OCTA_MOVER_H
 
 #include "octaPositioningSystem.h"
+#include "pathfinder.h"
+#include "adjustmentController.h"
 
 #define TURN_EPSILON_ROUGH 5
 #define TURN_EPSILON_FINE 0.4
@@ -37,8 +39,8 @@ int convertToDeg(byte direction){
 #define max(x, y) ((x)>(y) ? (x) : (y))
 
 bool isFacingDirection(byte direction, float epsilon) {
-	byte x = min(direction, ops_dir);
-	byte y = max(direction, ops_dir);
+	x = min(direction, ops_dir);
+	y = max(direction, ops_dir)
 	x += (y - x > 180) ? 360 : 0;
 	return abs(y-x) < epsilon;
 }
@@ -66,13 +68,13 @@ void movePath();
 byte getTargetSquare(byte distance){
 	byte direction = convertFromDeg(ops_dir);
 	switch(direction)
-	case north:
+	case n:
 		return ops_y - distance;
-	case east:
+	case e:
 		return ops_x + distance;
-	case south:
+	case s:
 		return ops_y + distance;
-	case west:	
+	case w:	
 		return ops_x - distance;
 	default:
 		//dunno
@@ -85,11 +87,14 @@ byte getTargetSquare(byte distance){
 bool reachedTarget(byte target, float epsilon){
 	byte direction = convertFromDeg(ops_dir);
 	byte current_in_dir_value;
-	if (direction == north || direction == south)
+    byte current_square;
+	if (direction == n || direction == s){
+        current_in_dir_value = ops_x;
+		current_squre = ops_xSquare;
+	else if (direction == e || direction == w)
 		current_in_dir_value = ops_y;
-	else if (direction == north || direction == south)
-		current_in_dir_value = ops_x;
-	if (abs(current_in_dir_value - epsilon)<epsilon)
+        current_square = ops_ySquare;
+    if (abs(current_in_dir_value - 128) < epsilon && current_square == target)
 		return true;
 	return false;	
 }
@@ -163,7 +168,6 @@ int getStart(){
     return 0;
 }    
 
- 
 void movePath(bool smooth) {
     int currentStep = getStart();
     while (!isOver(currentStep) {
@@ -183,3 +187,4 @@ void movePath(bool smooth) {
 }
 
 #endif // OCTA_MOVER_H
+
