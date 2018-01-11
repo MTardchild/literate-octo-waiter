@@ -1,6 +1,7 @@
 #ifndef OCTA_MOVER_H
 #define OCTA_MOVER_H
 
+#include "octaPositioningSystem.h"
 
 #define TURN_EPSILON_ROUGH 5
 #define TURN_EPSILON_FINE 0.4
@@ -36,8 +37,8 @@ int convertToDeg(byte direction){
 #define max(x, y) ((x)>(y) ? (x) : (y))
 
 bool isFacingDirection(byte direction, float epsilon) {
-	x = min(direction, ops_dir);
-	y = max(direction, ops_dir)
+	byte x = min(direction, ops_dir);
+	byte y = max(direction, ops_dir);
 	x += (y - x > 180) ? 360 : 0;
 	return abs(y-x) < epsilon;
 }

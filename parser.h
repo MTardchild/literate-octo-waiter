@@ -5,15 +5,12 @@
 #ifndef OCTA_PARSER_H
 #define OCTA_PARSER_H
 
-
-
+#include "arenas.h"
 
 /*
 * Takes a_map and parses it to mu_parsed_map 
 */
 void parse();
-
-
 
 void parse() {
     byte i;

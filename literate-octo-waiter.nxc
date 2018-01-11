@@ -1,11 +1,9 @@
-
+#include "pathfinder.h"
+#include "parser.h"
+#include "mover.h"
 
 task main() {
-	#ifdef parse
-		//parse
-	#else
-		// map
-	#endif // parse	
-	// pathfinding
-	// movement
+     parse();
+     find_path(1, 6, table_1);
+     movePath();
 }
