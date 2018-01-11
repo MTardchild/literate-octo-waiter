@@ -156,9 +156,15 @@ void goStraight(byte distance, byte smooth){
 	Off(OUT_AB);
 }
 
+int getStart(){
+    if (pf_path[0] == convertFromDeg(ops_dir) && pf_path[0] != pf_path[1])
+        return 1;
+    return 0;
+}    
+
  
 void movePath(bool smooth) {
-	int currentStep = 0;
+    int currentStep = getStart();
     while (!isOver(currentStep) {
         consecutiveSameDirections = 1;
         if (isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH) {
