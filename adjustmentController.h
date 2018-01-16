@@ -2,9 +2,9 @@
 #define OCTA_ADJUSTMENT_CONTROLLER_H
 
 // parameters constants to adjust smoothness
-#define kp 0.0006
-#define ki 0.0001
-#define kd 0.0001
+#define kp 0.006
+#define ki 0.001
+#define kd 0.001
 
 
 // public prototypes

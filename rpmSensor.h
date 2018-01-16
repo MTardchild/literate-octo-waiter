@@ -25,10 +25,19 @@ float rpmC = 0;
  *	motor: motor in hex
  *	returns: rpm of motor
  */
-float readRpm(byte motor) {
+float readRpmA() {
 	static long oldRotationCount = 0;
-	long rotationCount = MotorRotationCount(motor);
-	float rpm = (rotationCount - oldRotationCount) / T * 60 / 360;
+	long rotationCount = MotorRotationCount(OUT_A);
+	float rpm = (rotationCount - oldRotationCount) / T * 60 / 360.0;
+	oldRotationCount = rotationCount;
+	
+	return rpm;
+}
+
+float readRpmB() {
+	static long oldRotationCount = 0;
+	long rotationCount = MotorRotationCount(OUT_B);
+	float rpm = (rotationCount - oldRotationCount) / T * 60 / 360.0;
 	oldRotationCount = rotationCount;
 	
 	return rpm;
@@ -44,9 +53,19 @@ void storeRpm(byte motor, float rpm) {
 	switch(motor) {
 		case OUT_A:
 			rpmA = rpm;
+#ifdef DEBUG
+			ClearLine(LCD_LINE4);
+			TextOut(0, LCD_LINE4, "rpmA");
+			NumOut(50, LCD_LINE4, rpm);			
+#endif
 			break;
 		case OUT_B:
 			rpmB = rpm;
+#ifdef DEBUG
+			ClearLine(LCD_LINE5);
+			TextOut(0, LCD_LINE5, "rpmB");
+			NumOut(50, LCD_LINE5, rpm);			
+#endif
 			break;
 		case OUT_C:
 			rpmC = rpm;
@@ -60,9 +79,8 @@ void storeRpm(byte motor, float rpm) {
 task checkRpm() {
 	while(1) {
 		Wait(1000 * T);
-		storeRpm(OUT_A, readRpm(OUT_A));
-		storeRpm(OUT_B, readRpm(OUT_B));
-		storeRpm(OUT_C, readRpm(OUT_C));
+		storeRpm(OUT_A, readRpmA());
+		storeRpm(OUT_B, readRpmB());
 	}
 }
 

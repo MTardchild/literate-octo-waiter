@@ -8,6 +8,7 @@
 task main() {
      parse();
      find_path(1, 6, table_1);
-     Precedes(checkRpm, calculatePosition);
+     StartTask(checkRpm);
+     StartTask(calculatePosition);
      movePath(true);
 }

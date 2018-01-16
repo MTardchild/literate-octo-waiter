@@ -76,12 +76,15 @@ task calculatePosition() {
 #ifdef DEBUG
 		ClearLine(LCD_LINE1);
 		ClearLine(LCD_LINE2);
+		ClearLine(LCD_LINE7);
 		TextOut(50, LCD_LINE1, "X");
 		NumOut(0, LCD_LINE1, ops_xSquare);
 		NumOut(20, LCD_LINE1, ops_x);
 		TextOut(50, LCD_LINE2, "Y");
 		NumOut(0, LCD_LINE2, ops_ySquare);
 		NumOut(20, LCD_LINE2, ops_y);
+		TextOut(0, LCD_LINE7, "Dir");
+		NumOut(50, LCD_LINE7, ops_dir);
 #endif
 	}
 }
@@ -113,6 +116,13 @@ void dpmToDistance(float dpmA, float dpmB) {
     int signY = getDirectionSignY();
 	float ratioX = getRatioX();
 	float ratioY = 1 - ratioX;
+
+#ifdef DEBUG
+	ClearLine(LCD_LINE3);
+	TextOut(0, LCD_LINE3, "dist");
+	NumOut(50, LCD_LINE3, distance);
+#endif
+
 	addDistance(average * ratioX * signX, average * ratioY * signY);
 }
 
@@ -151,7 +161,7 @@ float getRatioX() {
  */
 void addDirection(float value) {
 	ops_dir += value;
-	ops_dir -= ops_dir > 359 ? 360 : 0; 	
+	ops_dir %= 360; 	
 }
 
 /*
@@ -161,26 +171,34 @@ void dpmToAngle(float dpmA, float dpmB) {
 	float distanceAxisA = dpmA * OPS_CALC_FREQUENCY / 1000;
 	float distanceAxisB = dpmB * OPS_CALC_FREQUENCY / 1000;
 	float distanceDiff = distanceAxisA - distanceAxisB;
-	float directionOffset = (distanceDiff/wheelBase) * turnConst;	
+	float directionOffset = (distanceDiff/(wheelBase*2)) * turnConst;	
 	addDirection(directionOffset);
 }
+
+void dpmToAngleTurning(float dpmA, float dpmB) {
+	float distanceAxisA = dpmA * OPS_CALC_FREQUENCY / 1000;
+	float distanceAxisB = dpmB * OPS_CALC_FREQUENCY / 1000;
+    float distance = abs(distanceAxisA) + abs(distanceAxisB);
+	distance = (distance / (wheelBase*2)) * turnConst;
+	addDirection(dpmA > 0 ? distance : distance * (-1));
+}	
 
 /*
  *	Converts rpm into distance/minute
  */
 float rpmToDpm(byte motor) {
-	float distance;
+	float rpm;
 
 	switch(motor) {
 		case OUT_A:
-			distance = rpmA;
+			rpm = rpmA;
 		case OUT_B:
-			distance = rpmB;
+			rpm = rpmB;
 		case OUT_C:
-			distance = rpmC;
+			rpm = rpmC;
 	}
 
-	return distance * rotationDistance * squarePointDistance; 
+	return rpm * rotationDistance / squarePointDistance; 
 }
 
 #endif // OCTA_POSITIONING_SYSTEM_H

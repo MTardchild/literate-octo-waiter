@@ -153,19 +153,19 @@ void goStraight(byte distance, byte smooth){
 	
 	if(smooth){
 		while(!isFacingDirection(direction, TURN_EPSILON_ROUGH)){
-			OnFwd(OUT_A, pidController(OUT_A, TURN_QUICK, rpmA * turnDir));
-			OnFwd(OUT_B, pidController(OUT_B, TURN_QUICK, rpmB * turnDir * -1));
+			OnFwd(OUT_A, pidController(OUT_A, TURN_QUICK * turnDir, rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, TURN_QUICK * turnDir * -1, rpmB));
 			Wait(100);
 		}
 		while(!isFacingDirection(direction, TURN_EPSILON_FINE)){
-			OnFwd(OUT_A, pidController(OUT_A, TURN_SLOW, rpmA * turnDir));
-			OnFwd(OUT_B, pidController(OUT_B, TURN_SLOW, rpmB * turnDir * -1));
+			OnFwd(OUT_A, pidController(OUT_A, TURN_SLOW * turnDir, rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, TURN_SLOW * turnDir * -1, rpmB));
 			Wait(100);
 		}
 	}else{
 		while (!isFacingDirection(direction, TURN_EPSILON_FINE)){
-			OnFwd(OUT_A, pidController(OUT_A, TURN_QUICK, rpmA * turnDir));
-			OnFwd(OUT_B, pidController(OUT_B, TURN_QUICK, rpmB * turnDir * -1));
+			OnFwd(OUT_A, pidController(OUT_A, TURN_QUICK * turnDir, rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, TURN_QUICK * turnDir * -1, rpmB));
 			Wait(100);
 		}
 	}
@@ -181,7 +181,13 @@ int getStart(){
 void movePath(bool smooth) {
     byte consecutiveSameDirections;
     int currentStep = getStart();
-    while (!isOver(currentStep)) {
+    bool isOver9000 = true;
+    while (isOver9000) {
+#ifdef DEBUG
+	ClearLine(LCD_LINE6);
+	TextOut(0, LCD_LINE6, "CStp");
+	NumOut(50, LCD_LINE6, pf_path[currentStep]);
+#endif
         consecutiveSameDirections = 1;
         if (isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH)) {
             ++currentStep;
@@ -194,6 +200,8 @@ void movePath(bool smooth) {
             turn(pf_path[currentStep], smooth);
 			++currentStep;
         }
+
+	isOver9000 = !isOver(currentStep);
     }
 }
 
