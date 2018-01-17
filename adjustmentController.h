@@ -2,9 +2,9 @@
 #define OCTA_ADJUSTMENT_CONTROLLER_H
 
 // parameters constants to adjust smoothness
-#define kp 0.006
+#define kp 0.015
 #define ki 0.001
-#define kd 0.001
+#define kd 0.0025
 
 
 // public prototypes
@@ -20,6 +20,8 @@
 int piController(int out, float target, float current);
 int pdController(int out, float target, float current);
 int pidController(int out, float target, float current);
+
+void reset_all();
 
 
 // crazy macros starting here
@@ -62,12 +64,14 @@ int x##Controller(int out, float target, float current){                        
 * Used to create one iController function per engine
 */
 #define iMacro(x)  \
-int iController##x(float target, float current)                                 \
+int iController##x(float target, float current, bool do_reset=false)        \
 {                                                                           \
-  static float sum = 0;                                                         \
+  static float sum = 0;     												\
+  if (do_reset)																\
+	  sum=0;  														\
   setUpLocalTimer();                                                        \
-  sum += (target - current);                                                  \
-  return ki * getTimeSinceLastCall() * sum;                                   \
+  sum += (target - current);                                                \
+  return ki * getTimeSinceLastCall() * sum;                                 \
 }
 
 /*
@@ -83,9 +87,11 @@ iMacro(C)
 * Used to create one dController function per engine
 */
 #define dMacro(x)  \
-int dController##x(float target, float current)                                 \
+int dController##x(float target, float current, bool do_reset=false)        \
 {                                                                           \
-  static float old_delta = 0;                                                 \
+  static float old_delta = 0;                                               \
+  if (do_reset)																\
+	  old_delta=0;															\
   setUpLocalTimer();                                                        \
   int a = kd * (target-current - old_delta) / getTimeSinceLastCall();       \
   old_delta = target - current;                                             \
@@ -122,6 +128,15 @@ controllerMacro(pid)
 #undef setUpLocalTimer
 #undef getTimeSinceLastCall
 
+
+void reset_all(){
+	iControllerA(0, 0, 1);
+	dControllerA(0, 0, 1);
+	iControllerB(0, 0, 1);
+	dControllerB(0, 0, 1);
+	iControllerC(0, 0, 1);
+	dControllerC(0, 0, 1);
+}
 
 #endif // OCTA_ADJUSTMENT_CONTROLLER_H
 

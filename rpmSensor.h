@@ -14,11 +14,6 @@ float rpmA = 0;
 float rpmB = 0;
 
 /*
- *	RPM of OUT_C
- */
-float rpmC = 0;
-
-/*
  *	Reads rotation count of given motor and calculates
  *	the corresponding rpm.
  *
@@ -30,7 +25,6 @@ float readRpmA() {
 	long rotationCount = MotorRotationCount(OUT_A);
 	float rpm = (rotationCount - oldRotationCount) / T * 60 / 360.0;
 	oldRotationCount = rotationCount;
-	
 	return rpm;
 }
 
@@ -39,7 +33,6 @@ float readRpmB() {
 	long rotationCount = MotorRotationCount(OUT_B);
 	float rpm = (rotationCount - oldRotationCount) / T * 60 / 360.0;
 	oldRotationCount = rotationCount;
-	
 	return rpm;
 }
 
@@ -67,9 +60,7 @@ void storeRpm(byte motor, float rpm) {
 			NumOut(50, LCD_LINE5, rpm);			
 #endif
 			break;
-		case OUT_C:
-			rpmC = rpm;
-			break;
+
 	}
 }
 

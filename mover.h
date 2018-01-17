@@ -5,15 +5,15 @@
 #include "pathfinder.h"
 #include "adjustmentController.h"
 
-#define TURN_EPSILON_ROUGH 5
-#define TURN_EPSILON_FINE 0.4
+#define TURN_EPSILON_ROUGH 40
+#define TURN_EPSILON_FINE 2
 #define DRIVE_EPSILON_ROUGH 30
-#define DRIVE_EPSILON_FINE 5
+#define DRIVE_EPSILON_FINE 6
 
 #define GO_QUICK 35
 #define GO_SLOW 15
-#define TURN_QUICK 15
-#define TURN_SLOW 5
+#define TURN_QUICK 20
+#define TURN_SLOW 2
 
 
 /*
@@ -21,8 +21,8 @@
 *
 *  direction: direction to be converted
 */
-int convertFromDeg(byte direction){
-	return (direction + 45) / 90;
+int convertFromDeg(int direction){
+	return ((direction + 45) / 90) + 1;
 }
 
 /*
@@ -35,26 +35,33 @@ int convertToDeg(byte direction){
 	return direction * 90;
 }
 
-#define min(x, y) ((x)<(y) ? (x) : (y))
-#define max(x, y) ((x)>(y) ? (x) : (y))
+#define min(x, y) (((x)<(y)) ? (x) : (y))
+#define max(x, y) (((x)>(y)) ? (x) : (y))
 
-bool isFacingDirection(byte direction, float epsilon) {
-	byte x = min(direction, ops_dir);
-	byte y = max(direction, ops_dir);
-	x += (y - x > 180) ? 360 : 0;
+bool isFacingDirection(int direction, float epsilon) {
+	int x = min(convertToDeg(direction), ops_dir);
+	int y = max(convertToDeg(direction), ops_dir);
+	x += ((y - x) > 180) ? 360 : 0;
+#ifdef DEBUG
+			ClearLine(LCD_LINE7);
+			TextOut(0, LCD_LINE7, "epsilon");
+			NumOut(50, LCD_LINE7, abs(y-x) < epsilon);
+#endif
 	return abs(y-x) < epsilon;
 }
 
 bool turnLeft(short direction){
-	direction += (abs(direction - ops_dir) > 180) ? 360 : 0;
-	return (ops_dir - direction) > 0;
+	int x = min(convertToDeg(direction), ops_dir);
+	int y = max(convertToDeg(direction), ops_dir);
+	x += 360 - y;
+	return x > 180;
 }
 
 
 /*
  *  Returns: If the path has been finished
  */
-#define isOver(currentStep) (currentStep != MAX_PATH_SIZE && pf_path[currentStep] != 0)
+#define isOver(currentStep) ((currentStep == MAX_PATH_SIZE) && (pf_path[currentStep] == 0))
 
 /* 
  *  Moves the path calculated by pathfinder.
@@ -65,7 +72,7 @@ void movePath(bool smooth);
 /*calculats the target square in the current direction
 *
 */
-byte getTargetSquare(byte distance){
+byte getTargetSquare(int distance){
 	byte direction = convertFromDeg(ops_dir);
 	switch(direction){
 	case n:
@@ -129,6 +136,7 @@ void goStraight(byte distance, byte smooth){
 		}
 	}
 	Off(OUT_AB);
+	reset_all();
 }
 
 #define DIR_LEFT -1
@@ -144,9 +152,8 @@ void goStraight(byte distance, byte smooth){
  */
  
  void turn(byte direction, byte smooth){
-	direction = convertToDeg(direction);
   int turnDir;
-	if(turnLeft(direction))
+	if(turnLeft(convertToDeg(direction)))
 		turnDir = DIR_LEFT;
 	else
 		turnDir = DIR_RIGHT;
@@ -169,38 +176,45 @@ void goStraight(byte distance, byte smooth){
 			Wait(100);
 		}
 	}
+
 	Off(OUT_AB);
+	reset_all();
 }
 
-int getStart(){
-    if (pf_path[0] == convertFromDeg(ops_dir) && pf_path[0] != pf_path[1])
+int initCurrentStep(){
+	bool test = ((pf_path[0] == convertFromDeg(ops_dir)) && (pf_path[0] == pf_path[1]));
+    if (test)
         return 1;
     return 0;
 }    
 
 void movePath(bool smooth) {
     byte consecutiveSameDirections;
-    int currentStep = getStart();
+    int currentStep = initCurrentStep();
     bool isOver9000 = true;
     while (isOver9000) {
-#ifdef DEBUG
-	ClearLine(LCD_LINE6);
-	TextOut(0, LCD_LINE6, "CStp");
-	NumOut(50, LCD_LINE6, pf_path[currentStep]);
-#endif
         consecutiveSameDirections = 1;
-        if (isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH)) {
+		bool test = isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH);
+        if (test) {
             ++currentStep;
-            while(isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH) && !isOver(currentStep)){
+				ClearLine(LCD_LINE8);
+	TextOut(0, LCD_LINE8, "currentStep");
+	NumOut(50, LCD_LINE8, currentStep);
+			test = isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH) && !isOver(currentStep);
+            while(test){
                 ++consecutiveSameDirections;
+
                 ++currentStep;
+								ClearLine(LCD_LINE8);
+	TextOut(0, LCD_LINE8, "currentStep");
+	NumOut(50, LCD_LINE8, currentStep);
+				test = isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH) && !isOver(currentStep);
             }
             goStraight(consecutiveSameDirections, smooth);
         } else {
             turn(pf_path[currentStep], smooth);
 			++currentStep;
         }
-
 	isOver9000 = !isOver(currentStep);
     }
 }

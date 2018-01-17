@@ -30,7 +30,7 @@ byte ops_y = 127;
  *  0 = North
  *  	The robot always starts facing south.
  */
-float ops_dir = 180;
+float ops_dir = 179;
 
 /*
  *	Cm equivalent of a square point.
@@ -48,19 +48,22 @@ const float rotationDistance = 13.67;
 const float turnConst = 114.591559026;
 
 /*
- *	Distance between the middle of the wheels in cm.
+ *	Distance between the middle of the wheels in square points.
  */
-const float wheelBase = 10.2;
+const float wheelBase = 9.3 / squarePointDistance;
 
 task calculatePosition(); 
 void addDistance(int distanceX, int distanceY);
 void dpmToDistance(float dpmA, float dpmB); 
 int getDirectionSignX();
 int getDirectionSignY();
-float getRatioX();
+float getRatioY();
 void addDirection(float value);
 void dpmToAngle(float dpmA, float dpmB);
+void dpmToAngleTurning(float dpmA, float dpmB);
 float rpmToDpm(byte motor); 
+
+#define sameSign(x, y) ((x < 0 && y < 0 || x >= 0 && y >= 0) ? 1 : 0)
 
 /*
  *	Calculates the current position and writes result into global variables. 
@@ -68,24 +71,31 @@ float rpmToDpm(byte motor);
  */
 task calculatePosition() {
 	while(1) {
+		Wait(OPS_CALC_FREQUENCY);
 		float dpmA = rpmToDpm(OUT_A); 
 		float dpmB = rpmToDpm(OUT_B);
-		Wait(OPS_CALC_FREQUENCY);
-		dpmToAngle(dpmA, dpmB);	
-		dpmToDistance(dpmA, dpmB);
-#ifdef DEBUG
-		ClearLine(LCD_LINE1);
-		ClearLine(LCD_LINE2);
-		ClearLine(LCD_LINE7);
-		TextOut(50, LCD_LINE1, "X");
-		NumOut(0, LCD_LINE1, ops_xSquare);
-		NumOut(20, LCD_LINE1, ops_x);
-		TextOut(50, LCD_LINE2, "Y");
-		NumOut(0, LCD_LINE2, ops_ySquare);
-		NumOut(20, LCD_LINE2, ops_y);
-		TextOut(0, LCD_LINE7, "Dir");
-		NumOut(50, LCD_LINE7, ops_dir);
-#endif
+		#ifdef DEBUG
+			ClearLine(LCD_LINE1);
+			TextOut(0, LCD_LINE1, "ops_x");
+			NumOut(50, LCD_LINE1, ops_x);			
+
+			ClearLine(LCD_LINE2);
+			TextOut(0, LCD_LINE2, "ops_y");
+			NumOut(50, LCD_LINE2, ops_y);			
+			
+			ClearLine(LCD_LINE6);
+			TextOut(0, LCD_LINE6, "ops_dir");
+			NumOut(50, LCD_LINE6, ops_dir);			
+		
+		#endif
+
+		
+		if (sameSign(dpmA, dpmB)){
+			dpmToAngle(dpmA, dpmB);	
+			dpmToDistance(dpmA, dpmB);
+		}else{
+			dpmToAngleTurning(dpmA, dpmB);
+		}
 	}
 }
 
@@ -111,33 +121,34 @@ void addDistance(int distanceX, int distanceY) {
  */
 void dpmToDistance(float dpmA, float dpmB) {
 	float average = (dpmA + dpmB) / 2;
-	float distance = average * OPS_CALC_FREQUENCY / 1000;
+	float distance = average * OPS_CALC_FREQUENCY / 60 / 1000;
     int signX = getDirectionSignX();
     int signY = getDirectionSignY();
-	float ratioX = getRatioX();
-	float ratioY = 1 - ratioX;
+	float ratioY = getRatioY();
+	float ratioX = 1 - ratioY;
+	
 
 #ifdef DEBUG
 	ClearLine(LCD_LINE3);
-	TextOut(0, LCD_LINE3, "dist");
-	NumOut(50, LCD_LINE3, distance);
+	TextOut(0, LCD_LINE3, "ratioX");
+	NumOut(50, LCD_LINE3, ratioX);
 #endif
 
-	addDistance(average * ratioX * signX, average * ratioY * signY);
+	addDistance(distance * ratioX * signX, distance * ratioY * signY);
 }
 
 /*
  *  Returns whether the x component has to be decreased or increased.
  */
 int getDirectionSignX() {
-    return ops_dir > 0 && ops_dir < 180 ? 1 : -1;
+    return (ops_dir > 0 && ops_dir < 180) ? 1 : -1;
 }
 
 /*
  *  Returns whether the y component has to be decreased or increased.
  */
 int getDirectionSignY() {
-    return ops_dir > 270 || ops_dir < 90 ? 1 : -1;
+    return (ops_dir > 270 || ops_dir < 90) ? 1 : -1;
 }
 
 /*
@@ -147,12 +158,12 @@ int getDirectionSignY() {
  *	if ops_dir = 45 the ratio will be 0.5 for x and y.
  *	if ops_dir = 90 the ratio will be 1 for x and 0 for y.
  */
-float getRatioX() {
+float getRatioY() {
 	int ratio = ops_dir % 180;
-	if (ratio > 90) ratio -= 90;
-	float ratioX = ratio / 90;
+	ratio -= 90;
+	float ratioY = ratio / 90;
 	
-	return ratioX;
+	return abs(ratioY);
 }
 
 /*
@@ -161,26 +172,29 @@ float getRatioX() {
  */
 void addDirection(float value) {
 	ops_dir += value;
-	ops_dir %= 360; 	
+	if (ops_dir < 0)
+		ops_dir += 360;
+	else if(ops_dir > 359)
+		ops_dir -= 360;
 }
 
 /*
  *	Calculates the new coordinate given the dpm.
  */
 void dpmToAngle(float dpmA, float dpmB) {
-	float distanceAxisA = dpmA * OPS_CALC_FREQUENCY / 1000;
-	float distanceAxisB = dpmB * OPS_CALC_FREQUENCY / 1000;
+	float distanceAxisA = dpmA * OPS_CALC_FREQUENCY / 1000 / 60;
+	float distanceAxisB = dpmB * OPS_CALC_FREQUENCY / 1000 / 60;
 	float distanceDiff = distanceAxisA - distanceAxisB;
 	float directionOffset = (distanceDiff/(wheelBase*2)) * turnConst;	
 	addDirection(directionOffset);
 }
 
 void dpmToAngleTurning(float dpmA, float dpmB) {
-	float distanceAxisA = dpmA * OPS_CALC_FREQUENCY / 1000;
-	float distanceAxisB = dpmB * OPS_CALC_FREQUENCY / 1000;
-    float distance = abs(distanceAxisA) + abs(distanceAxisB);
-	distance = (distance / (wheelBase*2)) * turnConst;
-	addDirection(dpmA > 0 ? distance : distance * (-1));
+	float distanceAxisA = dpmA * OPS_CALC_FREQUENCY / 1000 / 60;
+	float distanceAxisB = dpmB * OPS_CALC_FREQUENCY / 1000 / 60;
+    float distance = (abs(distanceAxisA) + abs(distanceAxisB)) / 2;
+	float angle = distance / wheelBase * turnConst;
+	addDirection((dpmA > dpmB) ? angle : angle * (-1));
 }	
 
 /*
@@ -192,12 +206,14 @@ float rpmToDpm(byte motor) {
 	switch(motor) {
 		case OUT_A:
 			rpm = rpmA;
+			break;
 		case OUT_B:
 			rpm = rpmB;
-		case OUT_C:
-			rpm = rpmC;
+			break;
+		default:
+			break;
 	}
-
+	
 	return rpm * rotationDistance / squarePointDistance; 
 }
 
