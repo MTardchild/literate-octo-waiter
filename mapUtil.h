@@ -26,9 +26,8 @@
 byte adjust_row(byte row, direction_t dir);
 byte adjust_col(byte col, direction_t dir);
 bool is_border(byte row, byte col, direction_t dir);
-bool is_wall(byte row, byte col, direction_t dir);
 bool visited(byte row, byte col, direction_t dir);
-bool is_table(byte row, byte col, direction_t dir);
+bool isTableOrWall(byte row, byte col, direction_t dir);
 byte next_to_goal(byte row, byte col, byte goal);
 
 #define opposite_dir(dir) (((((dir) + 1) % 4) + 1))
@@ -90,11 +89,6 @@ bool is_border(byte row, byte col, direction_t dir){
 }
 
 
-bool is_wall(byte row, byte col, direction_t dir){
-    return false;
-}
-
-
 bool visited(byte row, byte col, direction_t dir){
     row = adjust_row(row, dir);
     col = adjust_col(col, dir);
@@ -103,15 +97,25 @@ bool visited(byte row, byte col, direction_t dir){
     return false;
 }
 
-
-bool is_table(byte row, byte col, direction_t dir){
-    row = adjust_row(row, dir);
+bool isTable(byte row, byte col, direction_t dir){
+	row = adjust_row(row, dir);
     col = adjust_col(col, dir);
     byte val = map_val(row, col);
     if (val == table_1 || val == table_2 || val == table_3)
         return true;
     return false;
 }
+
+
+bool isWall(byte row, byte col, direction_t dir){
+    row = adjust_row(row, dir);
+    col = adjust_col(col, dir);
+    byte val = map_val(row, col);
+    if (val == border)
+        return true;
+    return false;
+}
+
 
 byte next_to_goal(byte row, byte col, byte goal){
     direction_t dir;

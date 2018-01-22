@@ -4,16 +4,19 @@
 #include "octaPositioningSystem.h"
 #include "pathfinder.h"
 #include "adjustmentController.h"
+#include "mapUtil.h"
 
 #define TURN_EPSILON_ROUGH 40
 #define TURN_EPSILON_FINE 2
-#define DRIVE_EPSILON_ROUGH 30
+#define DRIVE_EPSILON_ROUGH 40
 #define DRIVE_EPSILON_FINE 4
 
 #define GO_QUICK 35
-#define GO_SLOW 15
+#define GO_SLOW 10
 #define TURN_QUICK 20
 #define TURN_SLOW 2
+
+#define SENSOR_DIST (9.5 / squarePointDistance)
 
 
 /*
@@ -144,15 +147,15 @@ void goStraight(byte distance, byte smooth){
 		}
 		while(!reachedTarget(targetSquare, DRIVE_EPSILON_FINE)){
 			float adjFac = calcAdjustFactor();
-			OnFwd(OUT_A, pidController(OUT_A, GO_SLOW * adjFacLeft, rpmA));
-			OnFwd(OUT_B, pidController(OUT_B, GO_SLOW * adjFacRight, rpmB));
+			OnFwd(OUT_A, pidController(OUT_A, GO_SLOW, rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, GO_SLOW, rpmB));
 			Wait(100);
 		}
 	}else{
 		while (!reachedTarget(targetSquare, DRIVE_EPSILON_FINE)){
 			float adjFac = calcAdjustFactor();
-			OnFwd(OUT_A, pidController(OUT_A, GO_QUICK * adjFacLeft, rpmA));
-			OnFwd(OUT_B, pidController(OUT_B, GO_QUICK * adjFacRight, rpmB));
+			OnFwd(OUT_A, pidController(OUT_A, GO_QUICK, rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, GO_QUICK, rpmB));
 			Wait(100);
 		}
 	}
@@ -202,6 +205,89 @@ void goStraight(byte distance, byte smooth){
 	ac_resetAll();
 }
 
+void offTheWall(){
+	byte xSquareBefore = ops_xSquare;
+	byte ySquareBefore = ops_ySquare;
+	byte targetSquare;
+	
+	/*
+	HIT THE WALL
+	*/
+	SetSensor(IN_1, SENSOR_TOUCH);
+	SetSensor(IN_4, SENSOR_TOUCH);
+	bool leftHit = false;
+	bool rightHit = false;
+	while(true){	
+		if(!rightHit && SENSOR_1)
+			rightHit = true;
+		if(!leftHit && SENSOR_4)
+			leftHit = true;
+
+		if(leftHit)
+			Off(OUT_A);
+		else
+			OnFwd(OUT_A, pidController(OUT_A, GO_QUICK, rpmA));
+		if(rightHit)
+			Off(OUT_B);
+		else
+			OnFwd(OUT_B, pidController(OUT_B, GO_QUICK, rpmB));
+		
+		if(leftHit && rightHit)
+			break;
+		
+		Wait(50);
+	}
+	ac_resetAll();
+	
+	/*
+	BE SORRY
+	*/	
+	ops_xSquare = xSquareBefore;
+	ops_ySquare = ySquareBefore;
+
+	byte currentDir = convertFromDeg(ops_dir);
+
+	switch(currentDir){
+		case s:
+			ops_y = 255 - SENSOR_DIST;
+			targetSquare = ops_ySquare;
+			ops_dir = 180;
+			break;
+		case n:
+			ops_y = 0 + SENSOR_DIST;
+			targetSquare = ops_ySquare;
+			ops_dir = 0;
+			break;
+		case e:
+			ops_x = 255 - SENSOR_DIST;
+			targetSquare = ops_xSquare;
+			ops_dir = 90;
+			break;
+		case w:
+			ops_x = 0 + SENSOR_DIST;
+			targetSquare = ops_xSquare;
+			ops_dir = 270;
+			break;
+	}
+	
+	/*
+	APOLOGISE
+	*/	
+	while(true){
+		bool test = reachedTarget(targetSquare, DRIVE_EPSILON_FINE);
+		if(test){
+			Off(OUT_AB);
+			break;
+		}else{
+			OnFwd(OUT_A, pidController(OUT_A, GO_SLOW * (-1), rpmA));
+			OnFwd(OUT_B, pidController(OUT_B, GO_SLOW * (-1), rpmB));
+		}
+		
+		Wait(50);
+	}
+	ac_resetAll();	
+}
+
 int initCurrentStep(){
 	bool test = ((pf_path[0] == convertFromDeg(ops_dir)) && (pf_path[0] == pf_path[1]));
     if (test)
@@ -213,14 +299,16 @@ void movePath(bool smooth) {
     byte consecutiveSameDirections;
     int currentStep = initCurrentStep();
     bool isOver9000 = true;
+	if (isTable(ops_ySquare, ops_xSquare, convertFromDeg(ops_dir)))
+		offTheWall();
     while (isOver9000) {
         consecutiveSameDirections = 1;
 		bool test = isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH);
         if (test) {
             ++currentStep;
-				ClearLine(LCD_LINE8);
-	TextOut(0, LCD_LINE8, "currentStep");
-	NumOut(50, LCD_LINE8, currentStep);
+											ClearLine(LCD_LINE8);
+											TextOut(0, LCD_LINE8, "currentStep");
+											NumOut(50, LCD_LINE8, currentStep);
 			test = isFacingDirection(pf_path[currentStep], TURN_EPSILON_ROUGH) && !isOver(currentStep);
             while(test){
                 ++consecutiveSameDirections;
@@ -231,7 +319,9 @@ void movePath(bool smooth) {
 											TextOut(0, LCD_LINE5, "Steps");
 											NumOut(50, LCD_LINE5, consecutiveSameDirections);
             goStraight(consecutiveSameDirections, smooth);
-			
+			test = isWall(ops_ySquare, ops_xSquare, convertFromDeg(ops_dir));
+			if (test)
+				offTheWall();
         } else {
             turn(pf_path[currentStep], smooth);
 			++currentStep;

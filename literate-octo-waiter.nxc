@@ -10,9 +10,6 @@ task main() {
     parse();
     StartTask(checkRpm);
     StartTask(calculatePosition);
-	//pf_path[0] = 4;
-	// pf_path[1] = 4;
-	// pf_path[2] = 0;
 	byte path[9] = {table_1,
 					table_2,
 					table_3,

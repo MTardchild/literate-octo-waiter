@@ -40,7 +40,7 @@ const float squarePointDistance = 0.09803922;
 /*
  *	Cm equivalent of a wheel rotation.
  */
-const float rotationDistance = 13.67;
+const float rotationDistance = 14.8;
 
 /*
  *	Represents 360/Pi.
@@ -50,7 +50,7 @@ const float turnConst = 114.591559026;
 /*
  *	Distance between the middle of the wheels in square points.
  */
-const float wheelBase = 9.3 / squarePointDistance;
+const float wheelBase = 9.8 / squarePointDistance;
 
 task calculatePosition(); 
 void addDistance(int distanceX, int distanceY);
