@@ -16,8 +16,6 @@
 #define s 3
 #define w 4
 
-#define STARTING_DIRECTION s
-
 #define starting_square 4
 #define border 8
 #define empty 0
@@ -28,6 +26,7 @@
 byte adjust_row(byte row, direction_t dir);
 byte adjust_col(byte col, direction_t dir);
 bool is_border(byte row, byte col, direction_t dir);
+bool is_wall(byte row, byte col, direction_t dir);
 bool visited(byte row, byte col, direction_t dir);
 bool is_table(byte row, byte col, direction_t dir);
 byte next_to_goal(byte row, byte col, byte goal);
@@ -87,6 +86,11 @@ bool is_border(byte row, byte col, direction_t dir){
     col = adjust_col(col, dir);
     if (row == 0 || row == 13 || col == 0 || col == 13)
         return true;
+    return false;
+}
+
+
+bool is_wall(byte row, byte col, direction_t dir){
     return false;
 }
 

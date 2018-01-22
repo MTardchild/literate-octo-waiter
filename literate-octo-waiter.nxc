@@ -6,9 +6,26 @@
 
 
 task main() {
-     parse();
-     find_path(1, 6, table_1);
-     StartTask(checkRpm);
-     StartTask(calculatePosition);
-     movePath(true);
+	int i;
+    parse();
+    StartTask(checkRpm);
+    StartTask(calculatePosition);
+	//pf_path[0] = 4;
+	// pf_path[1] = 4;
+	// pf_path[2] = 0;
+	byte path[9] = {table_1,
+					table_2,
+					table_3,
+					starting_square,
+					table_1,
+					starting_square,
+					table_2,
+					starting_square,
+					table_3,
+					starting_square
+	};
+	for (i=0; i<9; i++){
+		find_path(ops_ySquare, ops_xSquare, path[i], convertFromDeg(ops_dir));
+		movePath(true);
+	}
 }

@@ -126,12 +126,16 @@ void dpmToDistance(float dpmA, float dpmB) {
     int signY = getDirectionSignY();
 	float ratioY = getRatioY();
 	float ratioX = 1 - ratioY;
-	
+	static int debugPoints = 0;
 
 #ifdef DEBUG
+	ClearLine(LCD_LINE4);
+	TextOut(0, LCD_LINE4, "x square");
+	NumOut(50, LCD_LINE4, ops_xSquare);
+	
 	ClearLine(LCD_LINE3);
-	TextOut(0, LCD_LINE3, "ratioX");
-	NumOut(50, LCD_LINE3, ratioX);
+	TextOut(0, LCD_LINE3, "y square");
+	NumOut(50, LCD_LINE3, ops_ySquare);
 #endif
 
 	addDistance(distance * ratioX * signX, distance * ratioY * signY);
@@ -148,7 +152,7 @@ int getDirectionSignX() {
  *  Returns whether the y component has to be decreased or increased.
  */
 int getDirectionSignY() {
-    return (ops_dir > 270 || ops_dir < 90) ? 1 : -1;
+    return (ops_dir > 270 || ops_dir < 90) ? -1 : 1;
 }
 
 /*

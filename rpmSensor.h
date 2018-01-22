@@ -46,7 +46,7 @@ void storeRpm(byte motor, float rpm) {
 	switch(motor) {
 		case OUT_A:
 			rpmA = rpm;
-#ifdef DEBUG
+#ifdef DEBUG2
 			ClearLine(LCD_LINE4);
 			TextOut(0, LCD_LINE4, "rpmA");
 			NumOut(50, LCD_LINE4, rpm);			
@@ -54,7 +54,7 @@ void storeRpm(byte motor, float rpm) {
 			break;
 		case OUT_B:
 			rpmB = rpm;
-#ifdef DEBUG
+#ifdef DEBUG2
 			ClearLine(LCD_LINE5);
 			TextOut(0, LCD_LINE5, "rpmB");
 			NumOut(50, LCD_LINE5, rpm);			

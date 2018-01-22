@@ -21,7 +21,7 @@
  *
  * The resulting path is written to pf_path.
  */
-void find_path(byte row, byte col, byte goal);
+void find_path(byte row, byte col, byte goal,  byte start_dir);
 
 
 //private implementation:
@@ -29,6 +29,7 @@ void find_path(byte row, byte col, byte goal);
 
 byte pf_path[MAX_PATH_SIZE];
 
+byte starting_direction;
 
 void trace_back_path(byte row, byte col, byte prev_dir) {
     direction_t dir;
@@ -39,7 +40,7 @@ void trace_back_path(byte row, byte col, byte prev_dir) {
     while (true){
         val = map_val(row, col);
         if (get_dir(val) == start_of_search) {
-            if (prev_dir != STARTING_DIRECTION)
+            if (prev_dir != starting_direction)
                 pf_path[i] = prev_dir;
             break;
         }
@@ -143,8 +144,8 @@ void b_first_search(byte row, byte col, byte goal) {
 	
 } 
 
-void find_path(byte row, byte col, byte goal){
-	
+void find_path(byte row, byte col, byte goal, byte start_dir){
+	starting_direction = start_dir;
     if (row < 14 && row >= 0 && col < 14 && col >= 0)
         b_first_search(row, col, goal);
     //else

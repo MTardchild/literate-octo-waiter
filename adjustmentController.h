@@ -21,7 +21,7 @@ int piController(int out, float target, float current);
 int pdController(int out, float target, float current);
 int pidController(int out, float target, float current);
 
-void reset_all();
+void ac_resetAll();
 
 
 // crazy macros starting here
@@ -129,7 +129,7 @@ controllerMacro(pid)
 #undef getTimeSinceLastCall
 
 
-void reset_all(){
+void ac_resetAll(){
 	iControllerA(0, 0, 1);
 	dControllerA(0, 0, 1);
 	iControllerB(0, 0, 1);
